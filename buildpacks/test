@@ -9,10 +9,16 @@ _run-cmd() {
   cd "$(dirname "${BASH_SOURCE[0]}")" || return 1
   local app_path="$PWD/$buildpack/tests/$app"
   cd - &> /dev/null || return 1
-	[[ "$CI" ]] || rmflag="--rm"
+  cmd="/bin/herokuish $cmd / $app"
+  volume_flag="-v $app_path:/tmp/app"
+  if [[ "$CI" ]]; then
+    volume_flag="--volumes-from buildpacks"
+    cmd="cp -rf ${app_path} /tmp/app && ${cmd}"
+  fi
+  [[ "$CI" ]] || rmflag="--rm"
   [[ "$TRACE" ]] && debug_flag="-e TRACE=true"
   # shellcheck disable=SC2086
-  docker run $rmflag $debug_flag --env=USER=herokuishuser -v "$app_path:/tmp/app" herokuish:dev /bin/herokuish $cmd / "$app"
+  docker run $rmflag $volume_flag $debug_flag --env=USER=herokuishuser  herokuish:dev bash -c "$cmd"
 }
 
 

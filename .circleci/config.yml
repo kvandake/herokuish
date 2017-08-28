@@ -18,14 +18,16 @@ jobs:
       - run: |
           make deps
       - run: |
+          cd ~/gliderlabs/herokuish
+          docker create -v /${PWD} --name buildpacks alpine:3.4 /bin/true
+          docker cp --follow-link "$PWD/buildpacks" buildpacks:/${PWD}/buildpacks
+      - run: |
           make build
       - run: |
           case $CIRCLE_NODE_INDEX in 0) basht tests/**/tests.sh ;; esac
       - run: |
           circleci tests glob buildpacks/*/tests/*/test.sh | circleci tests split --split-by=timings --timings-type=classname
           basht $(circleci tests glob buildpacks/*/tests/*/test.sh | circleci tests split --split-by=timings --timings-type=classname)
-      - run: |
-          ls -la /.circleci-task-data/circle-test-results/
       - deploy:
           name: release
           command: |
