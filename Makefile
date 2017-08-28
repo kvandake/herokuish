@@ -12,8 +12,8 @@ ifneq ($(shell shellcheck --version > /dev/null 2>&1 ; echo $$?),0)
 ifeq ($(SYSTEM),Darwin)
 	brew install shellcheck
 else
-	sudo add-apt-repository 'deb http://archive.ubuntu.com/ubuntu trusty-backports main restricted universe multiverse'
-	sudo apt-get update && sudo apt-get install -y shellcheck
+	@sudo add-apt-repository 'deb http://archive.ubuntu.com/ubuntu trusty-backports main restricted universe multiverse'
+	@sudo apt-get update && sudo apt-get install -y shellcheck
 endif
 endif
 
@@ -57,6 +57,11 @@ deps:
 
 test:
 	basht tests/*/tests.sh
+
+deb-setup:
+	@echo "-> Updating deb repository and installing build requirements"
+	@sudo apt-get update -qq
+	@sudo DEBIAN_FRONTEND=noninteractive DEBCONF_NONINTERACTIVE_SEEN=true apt-get install -qq -y software-properties-common python-software-properties
 
 circleci:
 	docker version

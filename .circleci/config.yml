@@ -10,20 +10,19 @@ jobs:
       - setup_remote_docker:
           version: 17.06.1-ce
       - run: |
+          case $CIRCLE_NODE_INDEX in 0) make deb-setup shellcheck;; esac
+      - run: |
+          case $CIRCLE_NODE_INDEX in 0) make lint;; esac
+      - run: |
           make circleci
       - run: |
           make deps
       - run: |
-          make shellcheck
-      - run: |
           make build
-      - run: |
-          make lint
       - run: |
           case $CIRCLE_NODE_INDEX in 0) basht tests/**/tests.sh ;; esac
       - run: |
           circleci tests glob buildpacks/*/tests/*/test.sh | circleci tests split --split-by=timings --timings-type=classname
-      - run: |
           basht $(circleci tests glob buildpacks/*/tests/*/test.sh | circleci tests split --split-by=timings --timings-type=classname)
       - run: |
           ls -la /.circleci-task-data/circle-test-results/
